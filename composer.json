@@ -1,0 +1,14 @@
+{
+  "name": "IgorSiqueira/task_manager",
+  "description": "Sistema de Gerenciamento de Tarefas ",
+  "require": {
+    "php": ">=8.2",
+    "envms/fluentpdo": "^2.2",
+    "catfan/medoo": "^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}
