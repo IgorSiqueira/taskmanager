@@ -1,0 +1,92 @@
+services:
+  # Serviço PHP para o projeto FluentPDO
+  php-fluentpdo:
+    build:
+      context: . # Contexto para o build da imagem
+      dockerfile: docker/php/Dockerfile # Caminho para o Dockerfile do PHP
+    container_name: taskmanager_php_fluentpdo
+    volumes:
+      - ./:/var/www/html # Monta o código do projeto no contêiner
+    depends_on:
+      - mysql
+    networks:
+      - task-network
+    environment:
+      # Você pode definir variáveis de ambiente específicas aqui se necessário
+      APP_ENV: development
+
+  # Serviço PHP para o projeto Medoo
+  php-medoo:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile # Reutiliza o mesmo Dockerfile
+    container_name: taskmanager_php_medoo
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - task-network
+    environment:
+      APP_ENV: development
+
+  # Serviço MySQL
+  mysql:
+    image: mysql:8.0 # Imagem oficial do MySQL 8.0
+    container_name: taskmanager_mysql
+    ports:
+      - "3306:3306" # Expõe a porta do MySQL para o host (opcional, para debug)
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # SENHA FORTE PARA PRODUÇÃO!
+      MYSQL_DATABASE: task_manager_db
+      MYSQL_USER: taskmanager_user
+      MYSQL_PASSWORD: userpassword # SENHA FORTE PARA PRODUÇÃO!
+    volumes:
+      - mysql-data:/var/lib/mysql # Volume nomeado para persistir os dados do MySQL
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql # Opcional: script SQL para rodar na inicialização
+    networks:
+      - task-network
+    healthcheck: # Verifica se o MySQL está pronto antes de outros serviços dependerem dele (útil para PHP)
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P", "3306", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+
+  # Serviço Nginx
+  nginx:
+    image: nginx:latest # Imagem oficial do Nginx
+    container_name: taskmanager_nginx
+    ports:
+      - "80:80"   # Porta HTTP
+      - "443:443" # Porta HTTPS
+    volumes:
+      - ./:/var/www/html # Para o Nginx servir arquivos estáticos e para o PHP-FPM
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/ # Arquivos de configuração dos sites
+      - ./docker/ssl/:/etc/nginx/ssl/ # Certificados SSL
+    depends_on:
+      php-fluentpdo:
+        condition: service_started # Espera o serviço PHP estar iniciado
+      php-medoo:
+        condition: service_started   # Espera o serviço PHP estar iniciado
+      mysql:
+        condition: service_healthy # Espera o MySQL estar saudável
+    networks:
+      - task-network
+    # O extra_hosts aqui é para o container Nginx resolver os domínios para si mesmo (127.0.0.1 DENTRO DO CONTAINER NGINX).
+    # Isso não é usualmente necessário se o Nginx está apenas servindo os sites e passando para PHP-FPM.
+    # A configuração de /etc/hosts na sua máquina Mac (127.0.0.1 projetofluentpdo.test) é o que direciona o tráfego para o Nginx.
+    # Vamos manter como no exemplo do seu teste, pode ser útil para algum proxy reverso interno ou testes específicos.
+    extra_hosts:
+      - "projetofluentpdo.test:127.0.0.1"
+      - "projetomedoo.test:127.0.0.1"
+
+# Definição das redes
+networks:
+  task-network:
+    driver: bridge # Rede padrão do tipo bridge
+
+# Definição dos volumes nomeados
+volumes:
+  mysql-data: # Usado pelo serviço mysql para persistência de dados

@@ -1,46 +1,148 @@
-# Task Manager - Projeto FullStack PHP
+# Task Manager - Projeto FullStack PHP (FluentPDO & Medoo)
 
-Este é um sistema de gerenciamento de tarefas (Task Manager) desenvolvido para demonstrar habilidades FullStack com PHP, MySQL, APIs REST, jQuery, CSS, JavaScript, HTML5 e Docker. O projeto consiste em dois sistemas funcionalmente idênticos, mas que utilizam diferentes bibliotecas de conexão ao banco de dados: FluentPDO e Medoo.
+## Introdução
+
+Este é um sistema de gerenciamento de tarefas (Task Manager) desenvolvido como um projeto FullStack. O objetivo principal é demonstrar habilidades no desenvolvimento de uma aplicação web completa, desde a configuração do ambiente com Docker até a implementação de funcionalidades de backend e frontend, seguindo boas práticas de segurança e organização de código.
+
+O projeto consiste em dois sistemas funcionalmente idênticos, diferindo apenas na biblioteca de acesso ao banco de dados utilizada:
+* **Sistema 1**: Utilizando FluentPDO (acessível via `https://projetofluentpdo.test`)
+* **Sistema 2**: Utilizando Medoo (acessível via `https://projetomedoo.test`)
+
+A aplicação será desenvolvida utilizando PHP 8.2+ em uma abordagem 100% Orientada a Objetos, sem o uso de frameworks PHP tradicionais, para focar nos fundamentos.
+
+## Funcionalidades Principais (Planejadas)
+
+* **Autenticação de Usuários:**
+  * Registro de novos usuários.
+  * Login e Logout.
+  * Recuperação de senha.
+  * Proteção de rotas.
+* **Gerenciamento de Tarefas (CRUD):**
+  * Listar todas as tarefas do usuário logado.
+  * Adicionar nova tarefa.
+  * Editar tarefa existente.
+  * Excluir tarefa.
+  * Marcar tarefa como concluída.
+* **Organização e Visualização de Tarefas:**
+  * Categorias de tarefas.
+  * Filtrar tarefas por categoria ou status.
+  * Ordenar tarefas por data, prioridade, etc.
+* **API REST:**
+  * Endpoints para todas as operações CRUD de tarefas.
+  * Autenticação via token.
+  * Respostas em formato JSON e status HTTP apropriados.
+
+## Tecnologias Utilizadas
+
+* **Backend:** PHP 8.2+ (100% Orientado a Objetos)
+* **Bibliotecas de Banco de Dados:** FluentPDO, Medoo
+* **Banco de Dados:** MySQL 8.0
+* **Servidor Web:** Nginx
+* **Containerização:** Docker, Docker Compose
+* **Frontend:** HTML5 Semântico, CSS (Flexbox para layout responsivo), JavaScript, jQuery (para manipulação DOM e AJAX)
+* **Segurança:** Conexão HTTPS obrigatória, hashing de senhas, proteção contra SQL Injection, XSS, CSRF tokens, validação de entradas.
+* **Gerenciamento de Dependências PHP:** Composer
 
 ## Arquitetura e Organização do Projeto
 
-O projeto adota uma arquitetura inspirada nos princípios do Domain-Driven Design (DDD), adaptada para um contexto de desenvolvimento com PHP procedural (ou com OOP leve, sem o uso de frameworks MVC tradicionais) e PHP 8.2+. O objetivo é promover uma clara separação de responsabilidades, facilitar a manutenção e permitir a coexistência das duas implementações de acesso a dados (FluentPDO e Medoo) de forma organizada.
+O projeto adota uma arquitetura inspirada nos princípios do Domain-Driven Design (DDD), implementada com PHP Orientado a Objetos, sem o uso de frameworks MVC tradicionais. O objetivo é promover uma clara separação de responsabilidades, facilitar a manutenção e permitir a coexistência das duas implementações de acesso a dados.
 
-A estrutura de diretórios principal é dividida da seguinte forma:
+As camadas principais são:
+* **`app/Domain`**: Contém a lógica de negócios central e as entidades (Usuário, Tarefa, Categoria).
+* **`app/Application`**: Orquestra os casos de uso através de serviços da aplicação.
+* **`app/Infrastructure`**: Lida com detalhes técnicos como acesso ao banco de dados (com implementações separadas para FluentPDO e Medoo), configurações, etc.
+* **`public/`**: Pontos de entrada HTTP da aplicação (DocumentRoots), com subdiretórios `fluentpdo/` e `medoo/`.
 
+Para mais detalhes, veja a estrutura de diretórios abaixo.
 
+## Pré-requisitos
 
-### Camadas da Aplicação (`app/`)
+* Docker Desktop (ou Docker Engine + Docker Compose) instalado.
+* OpenSSL (geralmente já incluído no macOS e Linux).
+* Um editor de código (ex: PHPStorm).
+* Navegador Web moderno.
 
-* **`app/Domain`**:
-  Esta camada é o coração da aplicação. Ela contém a lógica de negócios pura e as definições das entidades principais do sistema (como `User`, `Task`, `Category`). Idealmente, o código aqui é independente de qualquer detalhe de infraestrutura (como o banco de dados específico ou a forma de apresentação). Mesmo em um estilo procedural, as funções aqui se concentram nas regras e manipulações dos dados do domínio.
+## Configuração do Ambiente de Desenvolvimento Local
 
-* **`app/Application`**:
-  Funciona como um maestro, orquestrando as ações e casos de uso do sistema. Os "serviços" da aplicação (ex: `UserService.php`, `TaskService.php`) utilizam o `Domain` para executar a lógica de negócios e interagem com a camada de `Infrastructure` para persistir ou recuperar dados. Eles não contêm lógica de negócios complexa, mas coordenam o fluxo.
+Siga os passos abaixo para configurar e executar o projeto em seu ambiente local:
 
-* **`app/Infrastructure`**:
-  Esta camada lida com todos os aspectos técnicos e preocupações externas.
-    * **`Database`**: Contém as implementações concretas para acesso ao banco de dados. É aqui que residem as lógicas específicas para `FluentPDO` e `Medoo`, permitindo que o resto da aplicação (Domain e Application) permaneça agnóstico em relação à biblioteca de banco de dados utilizada. Cada subdiretório (`FluentPDO/`, `Medoo/`) terá seus próprios "repositórios" ou funções de acesso a dados.
-    * **`Config`**: Armazena arquivos de configuração, como credenciais de banco de dados.
-    * **`Common`**: Pode incluir utilitários compartilhados pela infraestrutura, como gerenciamento de sessão, hashing de senhas, etc.
+### 1. Clonar o Repositório
+```bash
+git clone <URL_DO_SEU_REPOSITORIO_GIT>
+cd taskmanager # ou o nome da pasta do seu projeto
+```
 
-### Pontos de Entrada e Interface (`public/`)
+### 2. Edite seu arquivo hosts para mapear os domínios dos projetos para o seu localhost.
+No macOS/Linux:
+```bash
+sudo nano /etc/hosts
+```
+No Windows:(execute o editor como administrador)
+```bash
+C:\Windows\System32\drivers\etc\hosts
+```
+Pode ser necessário limpar o cache DNS do seu sistema operacional após a alteração. No macOS:
 
-* A pasta `public/` contém os arquivos que são diretamente acessíveis pelo navegador.
-* Existem subdiretórios separados (`fluentpdo/` e `medoo/`) que servem como `DocumentRoot` para os respectivos domínios (`projetofluentpdo.test` e `projetomedoo.test`).
-* Cada um desses diretórios terá seus próprios scripts de inicialização (ex: `index.php`, `api.php`) que irão:
-    1.  Carregar o autoloader do Composer e configurações.
-    2.  Selecionar e configurar a implementação correta da camada de `Infrastructure` (FluentPDO ou Medoo).
-    3.  Delegar o tratamento da requisição para os serviços da camada `Application`.
-    4.  Renderizar a resposta (HTML para o frontend web, JSON para a API REST).
-* Arquivos estáticos como CSS, JavaScript e imagens também residem aqui, possivelmente em subdiretórios `assets/`.
+```bash
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+```
+### 3. Gerar Certificados SSL Autoassinados.
+Os certificados são necessários para acesso HTTPS e serão armazenados em docker/ssl/.
+Na raiz do projeto, execute:
 
-### Outros Diretórios
+```bash
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+    -keyout docker/ssl/projetofluentpdo.test.key \
+    -out docker/ssl/projetofluentpdo.test.crt \
+    -subj "/C=BR/ST=Minas Gerais/L=Belo Horizonte/O=LocalDev/CN=projetofluentpdo.test"
 
-* **`vendor/`**: Gerenciado pelo Composer, contém as bibliotecas de terceiros (FluentPDO, Medoo, etc.). Não deve ser editado manualmente.
-* **`docker/`**: Contém o `Dockerfile` para construir a imagem PHP customizada, configurações do Nginx para os domínios locais e SSL, e quaisquer outros arquivos relacionados ao ambiente Docker.
-* **`scripts/`**: Destinado a scripts de utilidade, principalmente os scripts SQL para a criação e manutenção do esquema do banco de dados.
+```
 
-Esta organização visa manter o código modular, testável e mais fácil de entender, mesmo seguindo uma abordagem procedural ou com OOP leve sem um framework completo. Ela também facilita o cumprimento do requisito de ter dois sistemas com diferentes bibliotecas de banco de dados, isolando essas diferenças na camada de `Infrastructure`.
+```bash
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+    -keyout docker/ssl/projetomedoo.test.key \
+    -out docker/ssl/projetomedoo.test.crt \
+    -subj "/C=BR/ST=Minas Gerais/L=Belo Horizonte/O=LocalDev/CN=projetomedoo.test"
+```
 
----
+### 3. Instalar Dependências do PHP (Composer)
+As dependências PHP são gerenciadas pelo Composer e já estão listadas no composer.json.
+Execute na raiz do projeto:
+
+```bash
+composer install
+```
+### 4. Instalar Dependências do PHP (Composer)
+Com todas as configurações prontas, suba os contêineres:
+
+```bash
+docker-compose up -d --build
+```
+```bash
+docker-compose up -d
+```
+
+### 5. Acesso ao projeto
+Após os contêineres estarem rodando (verifique com docker-compose ps):
+
+Sistema FluentPDO: Acesse https://projetofluentpdo.test
+Sistema Medoo: Acesse https://projetomedoo.test
+Seu navegador exibirá um aviso sobre o certificado SSL ser autoassinado. Você precisará aceitar o risco para continuar (geralmente clicando em "Avançado" e depois em "Continuar para o site").
+
+Atualmente, cada site exibe uma página index.php de teste com uma mensagem distinta.
+
+Estrutura de Diretórios Principal
+```bash
+├── app/                      # Contém o núcleo da aplicação (Domain, Application, Infrastructure)
+├── public/                   # Pontos de entrada HTTP (fluentpdo/, medoo/)
+├── docker/                   # Configurações do Docker (php/Dockerfile, nginx/conf.d/, ssl/)
+├── scripts/                  # Scripts auxiliares (init.sql para o banco)
+├── vendor/                   # Dependências do Composer
+├── composer.json             # Definição das dependências PHP
+├── docker-compose.yml        # Orquestração dos contêineres Docker
+└── README.md                 # Este arquivo
+```
+
+### 6. Scripts SQL (Banco de Dados)
+
+O arquivo scripts/init.sql é usado para inicializar o esquema do banco de dados quando o contêiner MySQL é criado pela primeira vez com um volume de dados vazio. Atualmente, ele está vazio. As tabelas necessárias (users, tasks, task_categories, user_sessions) serão definidas aqui.
