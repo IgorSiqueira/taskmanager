@@ -35,7 +35,7 @@ services:
     command: --default-authentication-plugin=caching_sha2_password
     container_name: taskmanager_mysql
     ports:
-      - "3306:3306"
+      - "8441:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: task_manager_db
@@ -57,8 +57,8 @@ services:
     image: nginx:latest
     container_name: taskmanager_nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8442:80"
+      - "8443:443"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
