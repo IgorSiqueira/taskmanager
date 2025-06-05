@@ -1,5 +1,5 @@
 {
-  "name": "IgorSiqueira/task_manager",
+  "name": "igorsiqueira/task_manager",
   "description": "Sistema de Gerenciamento de Tarefas",
   "type": "project",
   "require": {
@@ -18,5 +18,8 @@
     "sort-packages": true
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.75"
+  }
 }
